@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Chatbot Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --chat-user: #4361ee;
+            --chat-bot: #f0f2f5;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark-color);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            height: 700px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(0);
+            opacity: 1;
+            transition: var(--transition);
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+
+        .header h2 {
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin: 0;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 100%);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 10px;
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 5;
+        }
+
+        .nav-button {
+            padding: 10px 15px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 5px rgba(67, 97, 238, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .nav-button:active {
+            transform: translateY(0);
+        }
+
+        .nav-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .nav-button:hover::after {
+            opacity: 1;
+        }
+
+        .nav-button i {
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .dynamic-content {
+            padding: 20px;
+            background-color: var(--light-color);
+            border-radius: 10px;
+            margin: 15px;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transform-origin: top;
+        }
+
+        .dynamic-content.active {
+            display: block;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        .dynamic-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(67, 97, 238, 0.2);
+            padding-bottom: 8px;
+        }
+
+        .dynamic-content ul {
+            list-style-type: none;
+        }
+
+        .dynamic-content li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 20px;
+            transition: var(--transition);
+        }
+
+        .dynamic-content li:hover {
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .dynamic-content li::before {
+            content: '•';
+            color: var(--accent-color);
+            position: absolute;
+            left: 0;
+            font-size: 1.2rem;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            background-color: #f9f9f9;
+            background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 18px;
+            line-height: 1.4;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(10px);
+            animation: messageAppear 0.3s ease-out forwards;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: var(--chat-bot);
+            color: var(--dark-color);
+            border-top-left-radius: 5px;
+            animation-delay: 0.1s;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            border-top-right-radius: 5px;
+            animation-delay: 0.1s;
+        }
+
+        .message-time {
+            display: block;
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50px;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background-color: #f9f9f9;
+        }
+
+        #user-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+            background-color: white;
+        }
+
+        #submit-button {
+            margin-left: 15px;
+            padding: 0;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        #submit-button:active {
+            transform: translateY(0);
+        }
+
+        #submit-button i {
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        #submit-button:hover i {
+            transform: scale(1.1);
+        }
+
+        #submit-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        #submit-button:hover::after {
+            opacity: 1;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: var(--chat-bot);
+            border-radius: 18px;
+            margin: 8px 0;
+            align-self: flex-start;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transform: scale(0);
+            transition: var(--transition);
+            max-width: 70px;
+        }
+
+        .typing-indicator.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes messageAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .nav-buttons {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .nav-button {
+                min-width: auto;
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2><i class="fas fa-robot"></i> Premium Chat Assistant</h2>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-button" onclick="showContent('content1')">
+                <i class="fas fa-question-circle"></i> FAQ
+            </button>
+            <button class="nav-button" onclick="showContent('content2')">
+                <i class="fas fa-user-circle"></i> Account
+            </button>
+            <button class="nav-button" onclick="showContent('content3')">
+                <i class="fas fa-shopping-bag"></i> Products
+            </button>
+            <button class="nav-button" onclick="showContent('content4')">
+                <i class="fas fa-headset"></i> Support
+            </button>
+            <button class="nav-button" onclick="showContent('content5')">
+                <i class="fas fa-info-circle"></i> About
+            </button>
+        </div>
+
+        <div class="content-area">
+            <div id="content1" class="dynamic-content">
+                <h3><i class="fas fa-question-circle"></i> Frequently Asked Questions</h3>
+                <p>Here are some common questions you might want to ask:</p>
+                <ul>
+                    <li>What are your business hours?</li>
+                    <li>How can I contact support?</li>
+                    <li>Where can I find documentation?</li>
+                    <li>What payment methods do you accept?</li>
+                    <li>How do I reset my password?</li>
+                </ul>
+            </div>
+
+            <div id="content2" class="dynamic-content">
+                <h3><i class="fas fa-user-circle"></i> Account Information</h3>
+                <p>Manage your account settings:</p>
+                <ul>
+                    <li>Update profile information</li>
+                    <li>Change password or security settings</li>
+                    <li>View subscription details</li>
+                    <li>Manage connected devices</li>
+                    <li>Download your data</li>
+                </ul>
+            </div>
+
+            <div id="content3" class="dynamic-content">
+                <h3><i class="fas fa-shopping-bag"></i> Product Catalog</h3>
+                <p>Browse our product categories:</p>
+                <ul>
+                    <li>Electronics & Gadgets</li>
+                    <li>Home & Garden Essentials</li>
+                    <li>Clothing & Accessories</li>
+                    <li>Health & Wellness</li>
+                    <li>Books & Media</li>
+                </ul>
+            </div>
+
+            <div id="content4" class="dynamic-content">
+                <h3><i class="fas fa-headset"></i> Support Services</h3>
+                <p>Get help with our services:</p>
+                <ul>
+                    <li>Troubleshooting guides</li>
+                    <li>Contact technical support</li>
+                    <li>Request a callback</li>
+                    <li>Live chat with an expert</li>
+                    <li>Community forums</li>
+                </ul>
+            </div>
+
+            <div id="content5" class="dynamic-content">
+                <h3><i class="fas fa-info-circle"></i> About Us</h3>
+                <p>Learn more about our company:</p>
+                <ul>
+                    <li>Our mission and values</li>
+                    <li>Company history</li>
+                    <li>Meet the leadership team</li>
+                    <li>Career opportunities</li>
+                    <li>Press and media</li>
+                </ul>
+            </div>
+
+            <div class="chat-area" id="chat-area">
+                <div class="bot-message message">
+                    Hello! I'm your premium assistant. How can I help you today? You can select an option above or ask me anything.
+                    <span class="message-time">Just now</span>
+                </div>
+                <div class="typing-indicator" id="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Type your message here...">
+                <button id="submit-button" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Current active content
+        let activeContent = null;
+        let currentContext = 'general'; // Track current context for backend
+
+        // Show dynamic content based on nav button click
+        function showContent(contentId) {
+            // Hide all dynamic content first
+            const allContent = document.querySelectorAll('.dynamic-content');
+            allContent.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // If clicking the same button, toggle it off
+            if (activeContent === contentId) {
+                activeContent = null;
+                currentContext = 'general';
+                return;
+            }
+
+            // Show the selected content
+            const selectedContent = document.getElementById(contentId);
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+                activeContent = contentId;
+
+                // Set context for backend
+                currentContext = contentId.replace('content', ''); // Gets 1, 2, 3 etc.
+
+                // Add a bot message about the selected option
+                const optionText = document.querySelector(`button[onclick="showContent('${contentId}')"]`).textContent.trim();
+                addBotMessage(`You selected: ${optionText}. What would you like to know about this?`);
+            }
+        }
+
+        // Add a message from the bot to the chat area
+        function addBotMessage(message) {
+            const chatArea = document.getElementById('chat-area');
+            const typingIndicator = document.getElementById('typing-indicator');
+
+            // Show typing indicator first
+            typingIndicator.classList.add('active');
+
+            // Remove typing indicator after delay and show message
+            setTimeout(() => {
+                typingIndicator.classList.remove('active');
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'bot-message message';
+
+                // Format the message with icons for certain keywords
+                let formattedMessage = message;
+                if (message.includes('FAQ')) formattedMessage = message.replace('FAQ', '<i class="fas fa-question-circle"></i> FAQ');
+                if (message.includes('Account')) formattedMessage = message.replace('Account', '<i class="fas fa-user-circle"></i> Account');
+                if (message.includes('Products')) formattedMessage = message.replace('Products', '<i class="fas fa-shopping-bag"></i> Products');
+                if (message.includes('Support')) formattedMessage = message.replace('Support', '<i class="fas fa-headset"></i> Support');
+                if (message.includes('About')) formattedMessage = message.replace('About', '<i class="fas fa-info-circle"></i> About');
+
+                messageDiv.innerHTML = formattedMessage + `<span class="message-time">${getCurrentTime()}</span>`;
+                chatArea.appendChild(messageDiv);
+                chatArea.scrollTop = chatArea.scrollHeight;
+
+                // Add pulse animation to the new message
+                messageDiv.style.animation = 'messageAppear 0.3s ease-out forwards';
+            }, 500); // Reduced delay since we're not generating locally
+        }
+
+        // Add a message from the user to the chat area
+        function addUserMessage(message) {
+            const chatArea = document.getElementById('chat-area');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'user-message message';
+            messageDiv.innerHTML = message + `<span class="message-time">${getCurrentTime()}</span>`;
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            // Add pulse animation to the new message
+            messageDiv.style.animation = 'messageAppear 0.3s ease-out forwards';
+        }
+
+        // Get current time in HH:MM format
+        function getCurrentTime() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2, '0') + ':' +
+                   now.getMinutes().toString().padStart(2, '0');
+        }
+
+        // Process and send user message to Flask backend
+        function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value.trim();
+
+            if (message) {
+                addUserMessage(message);
+                userInput.value = '';
+
+                // Show typing indicator
+                const typingIndicator = document.getElementById('typing-indicator');
+                typingIndicator.classList.add('active');
+
+                // Prepare data to send to Flask
+                const requestData = {
+                    message: message,
+                    context: currentContext // Send the current context to backend
+                };
+
+                // Send to Flask backend
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    typingIndicator.classList.remove('active');
+                    if (data.response) {
+                        addBotMessage(data.response);
+                    } else {
+                        addBotMessage("I didn't get a response from the server. Please try again.");
+                    }
+                })
+                .catch(error => {
+                    typingIndicator.classList.remove('active');
+                    addBotMessage("Sorry, there was an error connecting to the server.");
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        // Allow pressing Enter to send message
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Input field animation on focus
+        document.getElementById('user-input').addEventListener('focus', function() {
+            this.parentElement.style.boxShadow = '0 0 0 3px rgba(72, 149, 239, 0.2)';
+            this.parentElement.style.transition = 'box-shadow 0.3s ease';
+        });
+
+        document.getElementById('user-input').addEventListener('blur', function() {
+            this.parentElement.style.boxShadow = 'none';
+        });
+
+        // Show the first content by default
+        document.addEventListener('DOMContentLoaded', function() {
+            showContent('content1');
+
+            // Add initial greeting with delay
+            setTimeout(() => {
+                addBotMessage("Welcome to our premium chat service! I'm here to help with any questions you have.");
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
