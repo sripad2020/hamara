@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Hello Agent</title>
+    <title>5W Question Assistant</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -176,8 +176,6 @@
             cursor: pointer;
             transition: all 0.2s;
             border-bottom: 1px solid #f0f0f0;
-            word-break: break-word;
-            white-space: normal;
         }
 
         .question-category li:hover {
@@ -218,9 +216,6 @@
             transform: translateY(10px);
             animation: messageAppear 0.3s ease-out forwards;
             font-size: 1rem;
-            word-break: break-word;
-            white-space: pre-wrap;
-            overflow-wrap: break-word;
         }
 
         .bot-message {
@@ -275,9 +270,6 @@
             flex-direction: column;
             justify-content: center;
             margin-left: 50px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
         }
 
         .message-time {
@@ -507,9 +499,27 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2><i class="fas fa-robot"></i>  Hello Agent</h2>
+            <h2><i class="fas fa-robot"></i> 5W Question Assistant</h2>
         </div>
-        
+
+        <div class="question-buttons">
+            <button class="question-button" onclick="generateQuestion('what')">
+                <i class="fas fa-question"></i> What
+            </button>
+            <button class="question-button" onclick="generateQuestion('where')">
+                <i class="fas fa-map-marker-alt"></i> Where
+            </button>
+            <button class="question-button" onclick="generateQuestion('when')">
+                <i class="fas fa-clock"></i> When
+            </button>
+            <button class="question-button" onclick="generateQuestion('why')">
+                <i class="fas fa-lightbulb"></i> Why
+            </button>
+            <button class="question-button" onclick="generateQuestion('who')">
+                <i class="fas fa-user"></i> Who
+            </button>
+        </div>
+
         <div class="content-area">
             <div class="question-sidebar">
                 <div class="question-category">
@@ -537,7 +547,7 @@
             <div class="chat-container">
                 <div class="chat-area" id="chat-area">
                     <div class="bot-message message">
-                        <p>Hello! I'm your  question assistant. Ask me anything or click the buttons above to generate specific types of questions.</p>
+                        <p>Hello! I'm your 5W question assistant. Ask me anything or click the buttons above to generate specific types of questions.</p>
                         <span class="message-time">Just now</span>
                     </div>
                     <div class="typing-indicator" id="typing-indicator">
@@ -678,31 +688,46 @@
                 const typingIndicator = document.getElementById('typing-indicator');
                 typingIndicator.classList.add('active');
 
-                fetch('/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        context: 'general'
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
+                // Simulate API call (replace with actual fetch to your backend)
+                setTimeout(() => {
                     typingIndicator.classList.remove('active');
-                    if (data.response) {
-                        addBotMessage(data.response);
+
+                    // Sample response - replace with actual API response
+                    const sampleResponses = {
+                        "what": "This is an explanation of what it is.",
+                        "where": "This is information about where it can be found.",
+                        "when": "This explains when it is relevant.",
+                        "why": "Here's why it's important.",
+                        "who": "These are the people involved."
+                    };
+
+                    let response = "I'm not sure how to answer that. Can you be more specific?";
+                    const lowerMsg = message.toLowerCase();
+
+                    if (lowerMsg.includes("what")) {
+                        response = sampleResponses.what;
+                    } else if (lowerMsg.includes("where")) {
+                        response = sampleResponses.where;
+                    } else if (lowerMsg.includes("when")) {
+                        response = sampleResponses.when;
+                    } else if (lowerMsg.includes("why")) {
+                        response = sampleResponses.why;
+                    } else if (lowerMsg.includes("who")) {
+                        response = sampleResponses.who;
                     }
-                    if (data.questions) {
-                        displayQuestions(data.questions);
-                    }
-                })
-                .catch(error => {
-                    typingIndicator.classList.remove('active');
-                    addBotMessage("Sorry, there was an error connecting to the server.");
-                    console.error('Error:', error);
-                });
+
+                    addBotMessage(response);
+
+                    // Generate sample questions (replace with actual questions from your backend)
+                    const questions = {
+                        what: [`What exactly is ${lastUserMessage}?`, `What are the components of ${lastUserMessage}?`],
+                        where: [`Where can I learn more about ${lastUserMessage}?`, `Where is ${lastUserMessage} commonly found?`],
+                        when: [`When was ${lastUserMessage} first discovered?`, `When is the best time to use ${lastUserMessage}?`],
+                        why: [`Why is ${lastUserMessage} significant?`, `Why do we need ${lastUserMessage}?`],
+                        who: [`Who created ${lastUserMessage}?`, `Who benefits from ${lastUserMessage}?`]
+                    };
+                    displayQuestions(questions);
+                }, 1500);
             }
         }
 
