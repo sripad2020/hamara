@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify,render_template
+from flask import Flask, request, jsonify, render_template
 import google.generativeai as genai
 from nltk.tokenize import sent_tokenize, word_tokenize
 import re
@@ -8,14 +8,20 @@ import nltk
 
 app = Flask(__name__)
 
-# Download NLTK data (run this once)
+# Download NLTK data
 nltk.download('punkt')
 nltk.download('stopwords')
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
+    # Initialize with empty questions
+    return render_template('index.html',
+                           what_questions=[],
+                           where_questions=[],
+                           when_questions=[],
+                           why_questions=[],
+                           who_questions=[])
 
 
 def convert_paragraph_to_points(paragraph, num_points=5):
@@ -31,12 +37,51 @@ def convert_paragraph_to_points(paragraph, num_points=5):
         score = sum(freq_dist.get(word, 0) for word in sentence_word_tokens)
         sentence_scores[sentence] = score
     sorted_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)
-    key_points = sorted_sentences[:num_points]
-    return key_points
+    return sorted_sentences[:num_points]
 
 
 def clean_text(text):
     return re.sub(r'\*\*|\*', '', text)
+
+
+def generate_5w_questions(topic):
+    """Generate 5 W questions about a given topic"""
+    genai.configure(api_key='AIzaSyCOoAQyClkN6jGPl5iskpU0knbnERA-gVE')
+    model = genai.GenerativeModel('gemini-1.5-flash')
+
+    prompt = f"""Generate 5 different types of questions about: {topic}
+    Provide exactly 5 questions, one for each W:
+    1. What question (explanation/definition)
+    2. Where question (location/placement)
+    3. When question (timing/duration)
+    4. Why question (reason/purpose)
+    5. Who question (people/roles)
+
+    Format your response as:
+    What|||What is...?
+    Where|||Where can...?
+    When|||When does...?
+    Why|||Why is...?
+    Who|||Who is...?"""
+
+    response = model.generate_content(prompt)
+    questions = {
+        'what': [],
+        'where': [],
+        'when': [],
+        'why': [],
+        'who': []
+    }
+
+    if response.text:
+        for line in response.text.split('\n'):
+            if '|||' in line:
+                w_type, question = line.split('|||')
+                w_type = w_type.strip().lower()
+                if w_type in questions:
+                    questions[w_type].append(question.strip())
+
+    return questions
 
 
 @app.route('/chat', methods=['POST'])
@@ -50,32 +95,36 @@ def chatting():
             genai.configure(api_key='AIzaSyCOoAQyClkN6jGPl5iskpU0knbnERA-gVE')
             model = genai.GenerativeModel('gemini-1.5-flash')
 
-            # Context-based prompts
-            if context == '1':  # FAQ
-                prompt = f"Provide a concise answer to this FAQ question: {user_message}"
-            elif context == '2':  # Account
-                prompt = f"Help with account-related query: {user_message}"
-            elif context == '3':  # Products
-                prompt = f"Provide information about products related to: {user_message}"
-            elif context == '4':  # Support
-                prompt = f"Help with support issue: {user_message}"
-            elif context == '5':  # About
-                prompt = f"Provide information about our company related to: {user_message}"
-            else:
-                prompt = f"Respond to this general inquiry: {user_message}"
-
+            # Generate main response
+            prompt = f"Provide a detailed response to: {user_message}"
             response = model.generate_content(prompt)
-            generated_text = response.text
-            if context in ['1', '3', '4']:  # FAQ, Products, Support
-                key_points = convert_paragraph_to_points(generated_text)
-                key_points = [clean_text(item) for item in key_points]
-                formatted_response = "Here are the key points:\n- " + "\n- ".join(key_points)
-            else:
-                formatted_response = clean_text(generated_text)
-            return jsonify({'response': formatted_response})
+            generated_text = clean_text(response.text)
+
+            # Generate 5W questions
+            questions = generate_5w_questions(user_message)
+
+            return jsonify({
+                'response': generated_text,
+                'questions': {
+                    'what': questions['what'],
+                    'where': questions['where'],
+                    'when': questions['when'],
+                    'why': questions['why'],
+                    'who': questions['who']
+                }
+            })
         except Exception as e:
             print(f"Error: {str(e)}")
-            return jsonify({'response': "Sorry, I encountered an error processing your request."}), 500
+            return jsonify({
+                'response': "Sorry, I encountered an error processing your request.",
+                'questions': {
+                    'what': [],
+                    'where': [],
+                    'when': [],
+                    'why': [],
+                    'who': []
+                }
+            }), 500
 
 
 if __name__ == '__main__':
